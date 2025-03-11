@@ -46,6 +46,7 @@ response: {
 NO SE DEBE GUARDAR AL USUARIO EN NINGUN LADO con consologuear que llegan los datos en el body basta
 Probar hacer el registro con postman
 */
+/* Hola */
 
 app.use('/api/auth', authRouter)
 app.use('/api/workspaces', workspace_router)
