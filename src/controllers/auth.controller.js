@@ -81,7 +81,7 @@ export const verifyEmailController = async (req, res) => {
         const {verification_token} = req.query
         const payload = jwt.verify(verification_token, ENVIROMENT.SECRET_KEY_JWT)
         const {email} = payload
-        const user_found = await UserRepository.verifyUserByEmail(email)
+        const user_found = await UserRepository.verifyUserByEmail(email, verification_token)
         res.redirect(ENVIROMENT.URL_FRONTEND + '/login')
     } catch (error) {
         console.log("error al registrar", error);
