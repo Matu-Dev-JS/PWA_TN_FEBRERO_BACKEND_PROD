@@ -1,11 +1,12 @@
 import workspaceRepository from "../repositories/workspace.repository.js";
+import workspaceService from "../services/workspace.service.js";
 
 
 export const createWorkspaceController = async (req, res) => {
     try {
         const { name } = req.body
         const owner_id = req.user._id
-        const new_workspace = await workspaceRepository.createWorkspace({ name, owner_id })
+        const new_workspace = await workspaceService.createWorkspace({ name, owner_id })
         res.json({
             ok: true,
             status: 201,
@@ -39,7 +40,7 @@ export const invteUserToWorkspaceController = async (req, res) => {
         const user_id = req.user._id
         const {invited_id, workspace_id} = req.params
 
-        const workspace_found = await workspaceRepository.addNewMember({owner_id: user_id, invited_id, workspace_id})
+        const workspace_found = await workspaceService.addMember(workspace_id, invited_id, user_id)
         res.json(
             {
                 ok: true,

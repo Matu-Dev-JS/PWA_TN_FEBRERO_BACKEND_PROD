@@ -95,25 +95,10 @@ class UserRepository {
     } */
 
     async verifyUserByEmail (email, verification_token){
-        const user_found = await this.findUserByEmail(email)
-        
-        if(!user_found){
-            throw new ServerError('User not found', 404)
-        }
 
-        if(user_found.verified){
-            throw new ServerError('User has already been verified', 400)
-        }
-
-        if(user_found.verification_token !== verification_token){
-            throw new ServerError('Invalid verification token', 400)
-        }
-        
         const queryStr = `UPDATE users SET verified = 1 WHERE email = ? AND verification_token = ?`
 
         await promisePool.execute(queryStr, [email, verification_token])
-
-        return user_found
     }
 
     /* async findUserByEmail (email){
@@ -127,14 +112,27 @@ class UserRepository {
         return result[0] || null
     }
 
+    async findUserById (id){
+        const queryStr = `SELECT * FROM users WHERE _id = ?`
+        const [result] = await promisePool.execute(queryStr, [id])
+
+        return result[0] || null
+    }
     //TAREA
-    async changeUserPassword(id, newPassword) {
+   /*  async changeUserPassword(id, newPassword) {
         const foundUser = await User.findById(id)
         if(!foundUser) {
             throw new ServerError('User not found', 404)
         }
         foundUser.password = newPassword
         await foundUser.save()
+    } */
+
+    async changeUserPassword(id, newPassword) {
+        
+        const queryStr = `UPDATE users SET password = ? WHERE _id = ?`
+        const [result] = await promisePool.execute(queryStr, [newPassword, id])
+        return result[0]
     }
 
 }

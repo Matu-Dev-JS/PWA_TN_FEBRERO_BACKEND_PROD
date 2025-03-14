@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken'
 import ENVIROMENT from "../config/enviroment.config.js";
 import { sendMail } from "../utils/mailer.utils.js";
 import { AUTHORIZATION_TOKEN_PROPS } from "../utils/constants/token.constants.js";
+import userRepository from "../repositories/user.repository.js";
+import authService from "../services/auth.service.js";
 
 export const registerController = async (req, res) => {
     try {
@@ -81,7 +83,7 @@ export const verifyEmailController = async (req, res) => {
         const {verification_token} = req.query
         const payload = jwt.verify(verification_token, ENVIROMENT.SECRET_KEY_JWT)
         const {email} = payload
-        const user_found = await UserRepository.verifyUserByEmail(email, verification_token)
+        const user_found = await authService.verifyUserByEmail(email, verification_token)
         res.redirect(ENVIROMENT.URL_FRONTEND + '/login')
     } catch (error) {
         console.log("error al registrar", error);
@@ -107,26 +109,8 @@ export const loginController = async (req, res) => {
     try{    
         
         const {email, password} = req.body
-        const user_found = await UserRepository.findUserByEmail(email)
-        if(!user_found){
-            throw new ServerError('User not found', 404)
-        }
-        if(!user_found.verified){
-            throw new ServerError('User found has no validated his email', 400)
-        }
-        const isSamePassword = await bcrypt.compare(password, user_found.password)
-        if(!isSamePassword){
-            throw new ServerError('The password is not correct', 400)
-        }
-        const authorization_token = jwt.sign(
-            {
-                [AUTHORIZATION_TOKEN_PROPS.ID]: user_found._id,
-                username: user_found.username,
-                email: user_found.email
-            },
-            ENVIROMENT.SECRET_KEY_JWT,
-            {expiresIn: '2h'}
-        )
+        const authorization_token = await authService.login(email, password)
+       
         return res.json({
             ok: true,
             status: 200,
@@ -205,14 +189,14 @@ export const rewritePasswordController = async (req, res) => {
     try {
         const { password, reset_token } = req.body
         const { _id } = jwt.verify(reset_token, ENVIROMENT.SECRET_KEY_JWT)
-
+        const user = await userRepository.findUserById(_id)
+        if(!user) {
+            throw new ServerError('User not found', 404)
+        }
         // Hashear la pwd
         const newHashedPassword = await bcrypt.hash(password, 10)
         await UserRepository.changeUserPassword(_id, newHashedPassword)
-        if('pepe123' === 'pepe123 '){
-            
-        }
-        
+    
         return res.json({
             ok: true,
             message: 'Password changed succesfully',

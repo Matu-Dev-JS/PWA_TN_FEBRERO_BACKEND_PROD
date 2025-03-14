@@ -1,13 +1,20 @@
 
+import promisePool from "../config/mysql.config.js";
 import Channel from "../models/Channel.model.js";
 import { ServerError } from "../utils/errors.utils.js";
 import workspaceRepository from "./workspace.repository.js";
 
 class ChannelRepository {
-    async findChannelById (channel_id){
+   /*  async findChannelById (channel_id){
         return Channel.findById(channel_id).populate('workspace')
+    } */
+    async findChannelById(channel_id){
+        const queryStr = `SELECT * FROM channels WHERE _id = ?`
+        const [result] = await promisePool.execute(queryStr, [channel_id])
+        return result[0]
     }
-    async createChannel({ name, workspace_id, user_id }) {
+
+    /* async createChannel({ name, workspace_id, user_id }) {
         const workspace_found = await workspaceRepository.findWorkspaceById(workspace_id)
         if (!workspace_found) {
             throw new ServerError("Workspace not found", 404)
@@ -27,7 +34,15 @@ class ChannelRepository {
         )
         return channel
 
-    }
+    } */
+        async createChannel({ name, workspace_id}) {
+          
+            const queryStr = `INSERT INTO channels (name, workspace) VALUES (?,?)`
+            const [result] = await promisePool.execute(queryStr, [name, workspace_id])
+            const channel_id = result.insertId
+            return {channel_id, name, workspace_id}
+        }
+
     
 }
 
