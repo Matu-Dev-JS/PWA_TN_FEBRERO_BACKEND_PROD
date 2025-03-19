@@ -37,13 +37,14 @@ class UserRepository {
             username, //OR 1 = 1 DROP TABLE users
             email, 
             password, 
-            verification_token
+            verification_token,
+            profile_image_base64
         }){
             try{
                 //Inyeccion sql
                 let queryStr = `
-                INSERT INTO users (username, email, password, verification_token)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO users (username, email, password, verification_token, profile_image_base64)
+                VALUES (?, ?, ?, ?, ?)
                 `
 
                 const [result] = await promisePool.execute(
@@ -52,7 +53,8 @@ class UserRepository {
                         username, 
                         email, 
                         password, 
-                        verification_token
+                        verification_token,
+                        profile_image_base64
                     ] 
                 )
                 

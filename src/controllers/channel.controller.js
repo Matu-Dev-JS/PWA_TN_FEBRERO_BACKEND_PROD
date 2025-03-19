@@ -88,7 +88,7 @@ export const getMessagesListFromChannelController = async (req, res) =>{
     try{
         const user_id = req.user[AUTHORIZATION_TOKEN_PROPS.ID]
         const {channel_id} = req.params
-        const messages = await messageRepository.findMessagesFromChannel({channel_id, user_id})
+        const messages = await messageService.getMessagesFromChannel({channel_id, user_id})
         res.json({
             ok: true,
             message: 'Messages found',

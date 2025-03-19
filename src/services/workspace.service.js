@@ -4,7 +4,7 @@ import { ServerError } from "../utils/errors.utils.js";
 class WorkspaceService {
     async createWorkspace({name, owner_id}){
         const workspace_created = await workspaceRepository.createWorkspace({name, owner_id})
-        await workspaceRepository.addMember(workspace_id, owner_id)
+        await workspaceRepository.addMember(workspace_created.workspace_id, owner_id)
 
         return workspace_created
     }

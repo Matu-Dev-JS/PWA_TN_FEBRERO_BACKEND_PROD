@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema(
         [USER_PROPS.ACTIVE]: {
             type: Boolean,
             default: true
+        },
+        profile_image_base64: {
+            type: String, 
+            default: null
         }
     }
 )

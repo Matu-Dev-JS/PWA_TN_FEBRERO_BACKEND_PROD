@@ -8,6 +8,10 @@ import { verifyLuckyMiddleware } from "./middlewares/verifyLuckyMiddleware.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import workspace_router from "./routes/workspace.router.js";
 import channelRouter from "./routes/channel.router.js";
+import messageRepository from "./repositories/message.repository.js";
+import { ServerError } from "./utils/errors.utils.js";
+
+import rateLimit from "express-rate-limit";
 
 const app = express()
 
@@ -20,6 +24,46 @@ app.use(cors(
         origin: ENVIROMENT.URL_FRONTEND
     }
 ))
+/* //Blacklist de ip
+const blockedIps = ['123.45.57.89']
+
+//Pasenlo a un middleware
+app.use((req, res, next) => {
+    const client_ip = req.ip 
+    if(!blockedIps.includes(client_ip)){
+        next()
+    }
+    else{
+        new ServerError( 'No tienes permisos para acceder', 401 )
+    }
+}) */
+
+//Whitelist de ip
+
+/* 
+const whiteListIp = ['123.45.57.89']
+
+app.use((req, res, next) => {
+    const client_ip = req.ip 
+    if(whiteListIp.includes(client_ip)){
+        next()
+    }
+    else{
+        new ServerError( 'No tienes permisos para acceder', 401 )
+    }
+}) */
+
+const rateLimiterMiddleware = rateLimit(
+    {
+        windowMs: 15 * 60 * 1000,//Tiempo o periodo de evaluacion
+        max: 3, //Maximas consultas en el tiempo establecido
+        message: {message: 'Baja un cambio bot'},
+        standardHeaders: 'draft-8'
+    }
+)
+
+app.use(rateLimiterMiddleware)
+
 //Si quieren que sea reservado para cierto dominio
 /* 
 app.use(cors(
@@ -28,7 +72,11 @@ app.use(cors(
     }
 )) 
 */
-app.use(express.json())
+app.use(express.json(
+    {
+        limit: '2mb'
+    }
+))
 
 
 /* 
@@ -66,4 +114,6 @@ app.get('/api/test/comprar', authMiddleware, (req, res) =>{
 app.listen(ENVIROMENT.PORT, () =>{
     console.log(`El servidor se esta ejecutando en http://localhost:${ENVIROMENT.PORT}`)
 })
+
+
 
